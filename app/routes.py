@@ -1,9 +1,14 @@
-from app import app
-from flask import render_template_string, request
+from app import app, db, models
+from flask import (render_template_string, request, render_template,
+                   redirect, session)
+import uuid
 
 
 @app.route("/")
 def index():
+    if 'authd' not in session:
+        return redirect('/login')
+
     returnUrl = request.args.get('returnURL') or None
     message = request.args.get('message') or None
 
@@ -15,6 +20,8 @@ def index():
 
 @app.route("/posts/add")
 def posts_add():
+    if 'authd' not in session:
+        return redirect('/login')
     return "<h1>Working</h1>"
 
 
@@ -31,34 +38,77 @@ def posts():
 
 @app.route("/posts/<person>")
 def posts_person(person):
+    if 'authd' not in session:
+        return redirect('/login')
     return "<h1>Working</h1>"
 
 
 @app.route("/friends")
 def friends():
+    if 'authd' not in session:
+        return redirect('/login')
     return "<h1>Working</h1>"
 
 
 @app.route("/friends/add/<person>")
 def friend_add(person):
+    if 'authd' not in session:
+        return redirect('/login')
     return "<h1>Working</h1>"
 
 
 @app.route("/friends/unfriend/<person>")
 def friend_remove(person):
+    if 'authd' not in session:
+        return redirect('/login')
     return "<h1>Working</h1>"
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    return "<h1>Working</h1>"
+    if request.method == "POST":
+        username = request.form.get('username')
+        userid = uuid.uuid4()
+        user = models.Person(username=username, userid=str(userid))
+        db.session.add(user)
+        db.session.commit()
+        session['username'] = username
+        session['authd'] = True
+        return redirect('/posts')
+    else:
+        if 'authd' in session:
+            return redirect('/posts')
+
+        return render_template('register.html',
+                               message=request.form.get("message"))
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return "<h1>Working</h1>"
+    if request.method == "POST":
+        username = request.form.get('username')
+        user = models.Person.query.filter_by(username=username).first()
+
+        if user is None:
+            return redirect('/login?message="no such user"')
+
+        session['username'] = username
+        session['authd'] = True
+        return redirect('/posts')
+
+    else:
+        if 'authd' in session:
+            return redirect('/posts')
+
+        return render_template('register.html',
+                               login=True,
+                               message=request.form.get("message"))
 
 
 @app.route("/logout")
 def logout():
-    return "<h1>Working</h1>"
+    if 'username' in session:
+        del(session['username'])
+    if 'authd' in session:
+        del(session['authd'])
+    return redirect('/login')

@@ -1,0 +1,22 @@
+{% if message %}
+
+{{ message }}
+
+{% endif %}
+
+{% if login %}
+<form action=/login method="POST">
+    <label for="username">Username:</label>
+    <input name="username" type="text" autocomplete="off">
+    <br>
+    <input type="submit" value="Login">
+</form>
+If you do not have an account <a href="/register">Please register here</a>
+{% else %}
+<form action=/register method="POST">
+    <label for="username">Username:</label>
+    <input name="username" type="text" autocomplete="off">
+    <br>
+    <input type="submit" value="Register">
+</form>
+{% endif %}
