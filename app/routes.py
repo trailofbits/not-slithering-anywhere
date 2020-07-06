@@ -15,6 +15,9 @@ def index():
     if message is not None:
         return render_template_string(message)
 
+    if returnUrl is not None:
+        return redirect(returnUrl)
+
     return render_template("main.html")
 
 
@@ -25,7 +28,7 @@ def posts_add():
 
     # if you wanted to talk sensitive data protection
     # within logs, I think this would be an interesting
-    # location, so I'll accept posts via both GET and 
+    # location, so I'll accept posts via both GET and
     # POST here. GET is almost certainly wrong if you
     # consider user data sensitive, ignoring the fact
     # that it *also* is incorrect as per RFC-2616
