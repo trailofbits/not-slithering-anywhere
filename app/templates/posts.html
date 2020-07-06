@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="/posts/add" method="POST">
+  <label for="post">Post</label>
+  <input type="text" name="post">
+  <input type="submit" value="Post">
+</form>
+
+<h1>Posts</h1>
+<ol>
+{% for post in posts %}
+  <li> {{ post.post|safe }} </li>
+{% endfor %}
+</ol>
+{% endblock %}

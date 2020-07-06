@@ -8,3 +8,10 @@ class Person(db.Model):
     def __repr__(self):
         return "Person<username: %s, userid: %s>".format(self.username,
                                                          self.userid)
+
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    post = db.Column(db.Text)
+    postid = db.Column(db.Text)
+    userid = db.Column(db.Integer, db.ForeignKey('person.id'))

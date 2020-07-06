@@ -15,14 +15,33 @@ def index():
     if message is not None:
         return render_template_string(message)
 
-    return "<h1>Working</h1>"
+    return render_template("main.html")
 
 
-@app.route("/posts/add")
+@app.route("/posts/add", methods=["GET", "POST"])
 def posts_add():
     if 'authd' not in session:
         return redirect('/login')
-    return "<h1>Working</h1>"
+
+    # if you wanted to talk sensitive data protection
+    # within logs, I think this would be an interesting
+    # location, so I'll accept posts via both GET and 
+    # POST here. GET is almost certainly wrong if you
+    # consider user data sensitive, ignoring the fact
+    # that it *also* is incorrect as per RFC-2616
+
+    if request.method == "POST":
+        post_text = request.form.get("post")
+    else:
+        post_text = request.query.get("post")
+
+    user = models.Person.query.filter_by(username=session["username"]).first()
+    pid = str(uuid.uuid4())
+    post = models.Post(post=post_text, postid=pid, userid=user.id)
+    db.session.add(post)
+    db.session.commit()
+
+    return redirect('/posts')
 
 
 @app.route("/posts")
@@ -30,10 +49,16 @@ def posts():
 
     search = request.args.get('search') or None
 
-    if search is not None:
-        pass
+    posts = None
 
-    return "<h1>Working</h1>"
+    if search is not None:
+        posts = models.Post.filter(models.Post.post.contains(search))
+    else:
+        posts = models.Post.query.all()
+
+    return render_template('posts.html',
+                           posts=posts,
+                           search=search)
 
 
 @app.route("/posts/<person>")
