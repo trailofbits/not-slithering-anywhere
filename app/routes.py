@@ -36,7 +36,7 @@ def posts_add():
     if request.method == "POST":
         post_text = request.form.get("post")
     else:
-        post_text = request.query.get("post")
+        post_text = request.args.get("post")
 
     user = models.Person.query.filter_by(username=session["username"]).first()
     pid = str(uuid.uuid4())
@@ -130,7 +130,7 @@ def login():
 
         return render_template('register.html',
                                login=True,
-                               message=request.form.get("message"))
+                               message=request.args.get("message"))
 
 
 @app.route("/logout")
