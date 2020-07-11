@@ -2,6 +2,10 @@ from app import app, db, models
 from flask import (render_template_string, request, render_template,
                    redirect, session)
 import uuid
+import re
+
+
+uid_re = re.compile("[a-zA-Z0-9\-]*")
 
 
 @app.route("/")
@@ -69,6 +73,45 @@ def posts_person(person):
     if 'authd' not in session:
         return redirect('/login')
     return "<h1>Working</h1>"
+
+
+@app.route('/people')
+def people():
+
+    query_prefix = "SELECT * FROM person WHERE username like '%"
+
+    if 'authd' not in session:
+        return redirect('/login')
+
+    if "search" in request.args:
+        search = request.args.get("search")
+        people = db.session.execute(query_prefix + search + "%'")
+        return render_template("people_search.html",
+                               people=people,
+                               search=search)
+    else:
+        return render_template("people_search.html")
+
+
+@app.route('/people/<uid>')
+def people_by_id(uid):
+
+    query = "SELECT * FROM person WHERE userid = :userid"
+
+    if 'authd' not in session:
+        return redirect('/login')
+
+    res = uid_re.search(uid)
+
+    people = None
+
+    if res.end() == 0:
+        people = []
+    else:
+        people = db.session.execute(query, {"userid":uid})
+
+    return render_template("people_search.html",
+                           people=people)
 
 
 @app.route("/friends")
@@ -139,4 +182,8 @@ def logout():
         del(session['username'])
     if 'authd' in session:
         del(session['authd'])
+
+    if 'message' in request.args:
+        return render_template_string(request.args.get("message"))
+
     return redirect('/login')

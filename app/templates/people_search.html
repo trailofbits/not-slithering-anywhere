@@ -1,0 +1,14 @@
+<form action="/people" method="GET">
+  <label for="search">Search for a person</label>
+  <input type="text" name="search">
+  <input type="submit" value="Submit">
+</form>
+
+{% if people %}
+  you searched for {{ search | e }}
+  <ol>
+  {% for person in people %}
+    <li> {{ person.username }} </li> 
+  {% endfor %}
+  </ol>
+{% endif %}
