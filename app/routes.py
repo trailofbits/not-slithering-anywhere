@@ -1,11 +1,21 @@
 from app import app, db, models
 from flask import (render_template_string, request, render_template,
                    redirect, session)
+from functools import wraps
 import uuid
 import re
 
 
 uid_re = re.compile("[a-zA-Z0-9\-]*")
+
+
+def auth_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'authd' not in session:
+            return redirect('/login')
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @app.route("/")
@@ -94,12 +104,10 @@ def people():
 
 
 @app.route('/people/<uid>')
+@auth_required
 def people_by_id(uid):
 
     query = "SELECT * FROM person WHERE userid = :userid"
-
-    if 'authd' not in session:
-        return redirect('/login')
 
     res = uid_re.search(uid)
 
@@ -116,14 +124,14 @@ def people_by_id(uid):
 
 @app.route("/friends")
 def friends():
-    if 'authd' not in session:
+    if 'auth' not in session:
         return redirect('/login')
     return "<h1>Working</h1>"
 
 
 @app.route("/friends/add/<person>")
 def friend_add(person):
-    if 'authd' not in session:
+    if 'authd' in session:
         return redirect('/login')
     return "<h1>Working</h1>"
 
