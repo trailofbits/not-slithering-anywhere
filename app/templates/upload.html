@@ -1,0 +1,9 @@
+{% if message %}
+  {{message}}
+{% endif %}
+
+<form method="POST" action="/posts/backup_verify" enctype="multipart/form-data">
+    <label for="upload">Upload a backup file to be verified</label>
+    <input type="file" name="backup">
+    <input type="submit" value="Verify Backup">
+</form>

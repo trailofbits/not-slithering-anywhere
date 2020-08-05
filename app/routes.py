@@ -1,9 +1,11 @@
-from app import app, db, models
+from app import app, db, models, PostBackup
 from flask import (render_template_string, request, render_template,
-                   redirect, session)
+                   redirect, session, send_file)
 from functools import wraps
 import uuid
 import re
+import io
+import pickle
 
 
 uid_re = re.compile("[a-zA-Z0-9\-]*")
@@ -76,6 +78,46 @@ def posts():
     return render_template('posts.html',
                            posts=posts,
                            search=search)
+
+
+@app.route("/posts/backup")
+def posts_backup():
+
+    if 'authd' not  in session:
+        return redirect('/login')
+
+    posts = models.Post.query.all()
+    post_backup = PostBackup(posts)
+    fh = io.BytesIO()
+    pickle.dump(post_backup, fh)
+    fh.seek(0)
+    return send_file(fh,
+                     as_attachment=True,
+                     attachment_filename="Backup.pickle")
+
+
+@app.route("/posts/backup_verify", methods=["GET", "POST"])
+def posts_backup_verify():
+
+    if 'authd' not in session:
+        return redirect('/login')
+
+
+    if request.method == 'POST':
+        if 'backup' not in request.files:
+            return render_template('upload.html',
+                                   message='file not uploaded')
+
+        fh = request.files['backup']
+        try:
+            posts = pickle.load(fh)
+            return render_template('upload.html',
+                                   message="upload verified successfully")
+        except Exception as e:
+            return render_template('upload.html',
+                                   message=e)
+    else:
+        return render_template('upload.html')
 
 
 @app.route("/posts/<person>")
