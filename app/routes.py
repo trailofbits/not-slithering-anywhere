@@ -3,6 +3,7 @@ from flask import (render_template_string, request, render_template,
                    redirect, session, send_file)
 from functools import wraps
 import uuid
+import os
 import re
 import io
 import pickle
@@ -98,10 +99,6 @@ def posts_backup():
 
 @app.route("/posts/backup_verify", methods=["GET", "POST"])
 def posts_backup_verify():
-
-    if 'authd' not in session:
-        return redirect('/login')
-
 
     if request.method == 'POST':
         if 'backup' not in request.files:
