@@ -13,7 +13,7 @@ for static & dynamic tool testing grounds.
 
 The class itself uses common libraries such as flask, SQLAlchemy, and jinja2 to explain vulnerabilities.
 
-# Expected Vulernabilities
+# Expected Vulnerabilities
 
 ## Server
 
